@@ -1,0 +1,29 @@
+Student Result Prediction API — Deployment Guide
+
+Application: Flask REST API
+Port: 5000
+
+Endpoints:
+- GET / — Check application health
+- GET /health — Check application health
+- POST /predict — Predict student result
+
+Required prediction fields:
+- attendance
+- internal_marks
+- assignment_marks
+- previous_score
+
+Successful prediction response:
+{"prediction": "PASS", "prediction_code": 1}
+
+A prediction can also return FAIL when the model predicts class 0.
+
+Missing fields or non-numeric feature values return HTTP 400.
+
+To run locally:
+1. Install dependencies using: pip install -r requirements.txt
+2. Train the model using: python train_model.py
+3. Start the API using: python app.py
+
+The application listens on port 5000.
