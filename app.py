@@ -1,12 +1,11 @@
 
-import pickle
+import joblib
 import numpy as np
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-with open("student_result_model.pkl", "rb") as f:
-    model = pickle.load(f)
+model = joblib.load("student_result_model.pkl")
 
 
 @app.route("/", methods=["GET"])
