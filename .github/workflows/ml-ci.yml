@@ -3,51 +3,57 @@ name: Student Result ML CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  train-and-test:
+  train-test-release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Install ML dependencies
-        run: pip install -r requirements.txt
-
-
-      - name: Train student result model
+      - name: Train model
         run: python train_model.py
 
       - name: Check ML quality gate
         run: python quality_gate.py
 
-     
-      - name: Upload validated ML artifacts
-        uses: actions/upload-artifact@v7
+      - name: Run ML pipeline tests
+        run: python -m unittest test_ml_pipeline -v
+
+      - name: Run prediction API tests
+        run: python -m unittest test_app -v
+
+      - name: Prepare release candidate
+        run: |
+          mkdir -p release
+          cp app.py release/
+          cp student_result_model.pkl release/
+          cp metrics.json release/
+          cp requirements.txt release/
+          cp DEPLOYMENT.txt release/
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: student-result-ml-artifacts
-          path: |
-            student_result_model.pkl
-            metrics.json
-            student_results.csv
+          name: student-result-ml-release
+          path: release/
           if-no-files-found: error
           retention-days: 7
-
-
